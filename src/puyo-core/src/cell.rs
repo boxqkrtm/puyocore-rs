@@ -9,6 +9,8 @@ pub mod cell {
         NONE,
     }
 
+    pub const COLOR_COUNT:i8 = 5;
+
     pub fn to_char(cell: Type) -> char {
         match cell {
             Type::RED => 'R',
@@ -19,6 +21,7 @@ pub mod cell {
             Type::NONE => '.',
         }
     }
+
 
     pub fn from_char(c: char) -> Type {
         match c {
@@ -48,4 +51,6 @@ fn test() {
     assert_eq!(cell::to_char(cell::Type::BLUE), 'B');
     assert_eq!(cell::to_char(cell::Type::YELLOW), 'Y');
     assert_eq!(cell::to_char(cell::Type::GARBAGE), '#');
+
+    assert_eq!(cell::Type)
 }
