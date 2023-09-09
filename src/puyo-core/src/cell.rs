@@ -51,6 +51,4 @@ fn test() {
     assert_eq!(cell::to_char(cell::Type::BLUE), 'B');
     assert_eq!(cell::to_char(cell::Type::YELLOW), 'Y');
     assert_eq!(cell::to_char(cell::Type::GARBAGE), '#');
-
-    assert_eq!(cell::Type)
 }
