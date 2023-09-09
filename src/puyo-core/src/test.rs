@@ -1,4 +1,7 @@
 use crate::cell;
+use crate::tsumo;
+use crate::util;
+use crate::board;
 
 #[test]
 fn cell_test() {
