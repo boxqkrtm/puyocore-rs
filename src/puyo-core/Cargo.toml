@@ -1,10 +1,8 @@
 [package]
-name = "tuyotuyo-rs"
+name = "puyo-core"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bitintr = "0.3.0"
-puyo-core = { path = "./src/puyo-core" }
