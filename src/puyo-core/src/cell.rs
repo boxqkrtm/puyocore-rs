@@ -1,4 +1,3 @@
-
 #[derive(Debug, PartialEq)]
 pub enum CellType {
     NONE,
@@ -38,12 +37,10 @@ pub fn from_char(c: char) -> Cell {
     };
     return cell;
 }
-
 pub fn from_celltype(cell_type: CellType) -> Cell {
     let cell = Cell {
         element: cell_type
     };
     return cell;
 }
-
 pub const COUNT:i8 = 5; // without NONE
