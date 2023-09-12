@@ -6,7 +6,7 @@ impl M128i {
         M128i(unsafe { _mm_setzero_si128() })
     }
     pub fn all_bytes_one() -> M128i {
-        M128i(unsafe { _mm_set_epi32(0xFF, 0xFF, 0xFF, 0xFF)})
+        M128i(unsafe { _mm_set_epi64x(-1, -1)})
     }
     pub fn all_bytes_zero() -> M128i {
         M128i(unsafe { _mm_setzero_si128() })

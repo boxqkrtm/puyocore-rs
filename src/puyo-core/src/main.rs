@@ -1,12 +1,14 @@
-#![allow(dead_code)]
 
-mod cell;
-mod util;
-mod tsumo;
-mod field;
-mod fieldbit;
-mod test;
-mod m128i;
+#![allow(dead_code)]
+pub mod cell;
+pub mod util;
+pub mod tsumo;
+pub mod field;
+pub mod fieldbit;
+pub mod test;
+pub mod m128i;
+pub mod direction;
+pub mod chain;
 
 fn main() {
 }

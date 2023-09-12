@@ -2,7 +2,7 @@ use std::arch::x86_64::*;
 use crate::{util, m128i::M128i};
 #[derive(Clone, Copy)] 
 pub struct FieldBit {
-    data: M128i,
+    pub data: M128i,
 }
 impl FieldBit {
     pub fn new() -> FieldBit {
@@ -11,58 +11,51 @@ impl FieldBit {
         }
     }
 
-    fn set_bit(&mut self, x: i8, y: i8) {
+    pub fn set_bit(&mut self, x: i8, y: i8) {
         assert!(x >= 0 && x < 6);
         let mut v: [u16; 8] = [0; 8];
         unsafe {
-            _mm_store_si128(v.as_mut_ptr() as *mut __m128i, self.data.0);
+            _mm_storeu_si128(v.as_mut_ptr() as *mut __m128i, self.data.0);
         }
         v[x as usize] |= 1 << y;
         self.data.0 = unsafe { _mm_load_si128(v.as_ptr() as *const __m128i) };
     }
 
-    fn get_bit(&self, x: i8, y: i8) -> bool {
+    pub fn get_bit(&self, x: i8, y: i8) -> bool {
         if x < 0 || x > 5 || y < 0 || y > 12 {
             return true;
         }
         let mut v: [u16; 8] = [0; 8];
         unsafe {
-            _mm_store_si128(v.as_mut_ptr() as *mut __m128i, self.data.0);
+            _mm_storeu_si128(v.as_mut_ptr() as *mut __m128i, self.data.0);
         }
         v[x as usize] & (1 << y) != 0
     }
 
-    fn get_count(&self) -> u32 {
+    pub fn get_count(&self) -> u32 {
         let mut v: [u64; 2] = [0; 2];
         unsafe {
-            _mm_store_si128(v.as_mut_ptr() as *mut __m128i, self.data.0);
+            _mm_storeu_si128(v.as_mut_ptr() as *mut __m128i, self.data.0);
         }
         v[0].count_ones() + v[1].count_ones()
     }
 
-    fn get_col(&self, x: i8) -> u16 {
+    pub fn get_col(&self, x: i8) -> u16 {
         assert!(x >= 0 && x < 6);
         let mut v: [u16; 8] = [0; 8];
         unsafe {
-            _mm_store_si128(v.as_mut_ptr() as *mut __m128i, self.data.0);
+            _mm_storeu_si128(v.as_mut_ptr() as *mut __m128i, self.data.0);
         }
         v[x as usize]
     }
 
-    fn get_expand(&self) -> FieldBit {
-        let r = unsafe { _mm_srli_si128(self.data.0, 2) };
-        let l = unsafe { _mm_slli_si128(self.data.0, 2) };
-        let u = unsafe { _mm_srli_epi16(self.data.0, 1) };
-        let d = unsafe { _mm_slli_epi16(self.data.0, 1) };
-
-        let mut result = FieldBit::new();
-        result.data.0 = unsafe {
-            _mm_or_si128(
-                self.data.0,
-                _mm_or_si128(r, _mm_or_si128(l, _mm_or_si128(u, d))),
-            )
-        };
-        result
+    pub fn get_expand(& mut self) -> FieldBit {
+        let r = M128i(unsafe { _mm_srli_si128(self.data.0, 2) });
+        let l = M128i(unsafe { _mm_slli_si128(self.data.0, 2) });
+        let u = M128i(unsafe { _mm_srli_epi16(self.data.0, 1) });
+        let d = M128i(unsafe { _mm_slli_epi16(self.data.0, 1) });
+        self.data = self.data | (r | l | u | d);
+        return self.clone();
     }
 
     fn get_mask_12(&self) -> FieldBit {
@@ -87,7 +80,7 @@ impl FieldBit {
         result
     }
 
-    unsafe fn get_mask_pop(&self) -> FieldBit {
+    pub unsafe fn get_mask_pop(&self) -> FieldBit {
         let m12 = self.get_mask_12();
         let r = M128i(_mm_srli_si128(self.data.0, 2)) & m12.data;
         let l = M128i(_mm_slli_si128(self.data.0, 2)) & m12.data;
@@ -147,12 +140,12 @@ impl FieldBit {
         m
     }
 
-    fn get_mask_group_lsb(&self) -> FieldBit {
+    pub fn get_mask_group_lsb(&self) -> FieldBit {
         let m12 = self.get_mask_12();
 
         let mut v: [u64; 2] = [0; 2];
         unsafe {
-            _mm_store_si128(v.as_mut_ptr() as *mut __m128i, m12.data.0);
+            _mm_storeu_si128(v.as_mut_ptr() as *mut __m128i, m12.data.0);
         }
 
         if v[0] == 0 {
@@ -164,7 +157,7 @@ impl FieldBit {
 
         let mut m = FieldBit::new();
         m.data.0 = unsafe { _mm_load_si128(v.as_ptr() as *const __m128i) };
-
+        
         while !self.data == m.data {
             let m_expand = m.get_expand().data & m12.data;
             if unsafe { _mm_testc_si128(m.data.0, m_expand.0) != 0 } {
@@ -176,12 +169,12 @@ impl FieldBit {
         m
     }
 
-    fn pop(&mut self, mask: &FieldBit) {
+    pub fn pop(&mut self, mask: &FieldBit) {
         let mut v: [u16; 8] = [0; 8];
         let mut v_mask: [u16; 8] = [0; 8];
         unsafe {
-            _mm_store_si128(v.as_mut_ptr() as *mut __m128i, self.data.0);
-            _mm_store_si128(v_mask.as_mut_ptr() as *mut __m128i, mask.data.0);
+            _mm_storeu_si128(v.as_mut_ptr() as *mut __m128i, self.data.0);
+            _mm_storeu_si128(v_mask.as_mut_ptr() as *mut __m128i, mask.data.0);
         }
 
         for i in 0..6 {
@@ -191,7 +184,7 @@ impl FieldBit {
         self.data.0 = unsafe { _mm_load_si128(v.as_ptr() as *const __m128i) };
     }
 
-    fn print(&self) {
+    pub fn print(&self) {
         for i in (0..6).rev() {
             println!("{:013b}", self.get_col(i));
         }
