@@ -65,4 +65,9 @@ pub fn from_usize(i: usize) -> Cell {
         5 => from_celltype(CellType::NONE),
         _ => from_celltype(CellType::NONE)
     }
-} // without NONE
+}
+impl ToString for Cell {
+    fn to_string(&self) -> String {
+        return self.to_char().to_string();
+    }
+}
