@@ -2,7 +2,7 @@ use std::time::Instant;
 use puyo_core::field::Field;
 use puyo_core::chain;
 
-fn bench_pop(iter: i32) -> i64 {
+fn bench_pop(iter: i32) {
     let mut f = Field::new(); // Field 구조체 초기화 코드 추가
 
     let c: [[char; 7]; 13] = [
@@ -22,7 +22,7 @@ fn bench_pop(iter: i32) -> i64 {
     ];
     f.from(&c);
     let mut mask: Vec<Field> = Vec::new();
-        let time_start = Instant::now();
+    let time_start = Instant::now();
 
     for _ in 0..iter {
         let mut f_copy = f.clone();
@@ -30,16 +30,16 @@ fn bench_pop(iter: i32) -> i64 {
         chain::get_score(mask.clone());
     }
     let time_end = Instant::now();
-    let time = time_end.duration_since(time_start).as_nanos() as i64;
+    let time = time_end.duration_since(time_start).as_millis() as i32;
     let chain = chain::get_score(mask);
     f.print();
-    println!("count: {}", chain.count);
-    println!("score: {}", chain.score);
-    time / iter as i64
+    println!("iter = {}", iter);
+    println!("chain = {} score = {} ojama = {}", chain.count, chain.score, chain.score/70);
+    println!("elapsed = {}ms", time);
+    println!("times/s = {}", iter as f32 / time as f32);
 }
 
 fn main() {
-    let iter = 10000; // 원하는 반복 횟수 설정
-    let avg_time = bench_pop(iter);
-    println!("Average time: {} nanoseconds", avg_time);
+    let iter = 5000000; // 원하는 반복 횟수 설정
+    bench_pop(iter);
 }
