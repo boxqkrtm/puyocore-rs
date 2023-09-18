@@ -1,6 +1,6 @@
 use crate::{field::Field, cell};
 
-pub struct Score {
+pub struct Chain {
     pub count: u32,
     pub score: u32,
 }
@@ -11,8 +11,8 @@ const MAX_CHAIN_POWER: u32 = 999;
 const POWER: [u32; 19] = [
     0, 8, 16, 32, 64, 96, 128, 160, 192, 224, 256, 288, 320, 352, 384, 416, 448, 480, 512,
 ];
-pub fn get_score(mut mask: Vec<Field>) -> Score {
-    let mut result = Score { count: mask.len() as u32, score: 0 };
+pub fn get_score(mask: &mut Vec<Field>) -> Chain {
+    let mut result = Chain { count: mask.len() as u32, score: 0 };
 
     for index in 0..mask.len() {
         let pop_count = mask[index].get_count();

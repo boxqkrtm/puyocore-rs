@@ -23,15 +23,14 @@ fn bench_pop(iter: i32) {
     f.from(&c);
     let mut mask: Vec<Field> = Vec::new();
     let time_start = Instant::now();
-
+    let mut chain = chain::Chain { count: mask.len() as u32, score: 0 };
     for _ in 0..iter {
         let mut f_copy = f.clone();
         mask = f_copy.pop();
-        chain::get_score(mask.clone());
+        chain = chain::get_score(&mut mask);
     }
     let time_end = Instant::now();
     let time = time_end.duration_since(time_start).as_millis() as i32;
-    let chain = chain::get_score(mask);
     f.print();
     println!("iter = {}", iter);
     println!("chain = {} score = {} ojama = {}", chain.count, chain.score, chain.score/70);
