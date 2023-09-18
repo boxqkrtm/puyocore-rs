@@ -27,7 +27,7 @@ fn bench_pop(iter: i32) -> i64 {
     for _ in 0..iter {
         let mut f_copy = f.clone();
         mask = f_copy.pop();
-        //chain::get_score(mask.clone());
+        chain::get_score(mask.clone());
     }
     let time_end = Instant::now();
     let time = time_end.duration_since(time_start).as_nanos() as i64;
