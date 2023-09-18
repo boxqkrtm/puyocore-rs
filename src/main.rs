@@ -39,7 +39,7 @@ fn bench_pop(iter: i32) -> i64 {
 }
 
 fn main() {
-    let iter = 1; // 원하는 반복 횟수 설정
+    let iter = 10000; // 원하는 반복 횟수 설정
     let avg_time = bench_pop(iter);
     println!("Average time: {} nanoseconds", avg_time);
 }
