@@ -35,7 +35,8 @@ fn bench_pop(iter: i32) {
     println!("iter = {}", iter);
     println!("chain = {} score = {} ojama = {}", chain.count, chain.score, chain.score/70);
     println!("elapsed = {}ms", time);
-    println!("times/s = {}", iter as f32 / time as f32);
+    println!("times/s = {}", iter as f32 / (time as f32 / 1000.0));
+    println!("times/10ms = {}", iter as f32 / time as f32 * 10.0);
 }
 
 fn main() {
