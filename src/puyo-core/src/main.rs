@@ -1,4 +1,4 @@
-
+#![feature(portable_simd)]
 #![allow(dead_code)]
 pub mod cell;
 pub mod util;

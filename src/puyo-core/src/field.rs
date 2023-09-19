@@ -3,6 +3,7 @@ use crate::cell;
 use crate::direction;
 use crate::tsumo::Tsumo;
 use std::arch::x86_64::*;
+use std::simd::u16x8;
 
 pub struct Field {
     pub data: [FieldBit; cell::COUNT],//r g b y garbage
@@ -40,9 +41,10 @@ impl Field {
     pub fn get_height(&self, x: i8) -> u8 {
         let mask = self.get_mask();
         let v = mask.data;
-        let mut heights = [0u16; 8];
+        let mut heights = u16x8::splat(0);
+        let heights_mut_ptr = heights.as_mut_array().as_mut_ptr();
         unsafe {
-            _mm_storeu_si128(&mut heights as *mut [u16; 8] as *mut __m128i, v.0);
+            _mm_store_si128(heights_mut_ptr as *mut __m128i, v.0);
         }
         16 - heights[x as usize].leading_zeros() as u8
     }
@@ -53,14 +55,13 @@ impl Field {
         *heights.iter().max().unwrap()
     }
 
-        
-
     pub fn get_heights(&self, heights: &mut [u8; 6]) {
         let mask = self.get_mask();
         let v = mask.data;
-        let mut heights_arr = [0u16; 8];
+        let mut heights_arr = u16x8::splat(0);
+        let heights_arr_mut_ptr = heights_arr.as_mut_array().as_mut_ptr();
         unsafe {
-            _mm_storeu_si128(&mut heights_arr as *mut [u16; 8] as *mut __m128i, v.0);
+            _mm_store_si128(heights_arr_mut_ptr as *mut __m128i, v.0);
         }
         for i in 0..6 {
             heights[i] = 16 - heights_arr[i] as u8;
