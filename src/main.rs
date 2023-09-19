@@ -31,7 +31,7 @@ fn bench_pop(iter: i32) {
     }
     let time_end = Instant::now();
     let time = time_end.duration_since(time_start).as_millis() as i32;
-    f.print();
+    //f.print();
     println!("iter = {}", iter);
     println!("chain = {} score = {} ojama = {}", chain.count, chain.score, chain.score/70);
     println!("elapsed = {}ms", time);
