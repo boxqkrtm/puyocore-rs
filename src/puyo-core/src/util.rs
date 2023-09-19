@@ -8,7 +8,7 @@ pub static mut PEXT_TYPE: PextType = PextType::NAIVE;
 pub fn pext16(input: u16, mask: u16) -> u16 {
     unsafe {
         match PEXT_TYPE {
-            PextType::NATIVE => pext16_naive(input, mask),
+            PextType::NATIVE => _pext_u32(input as u32, mask as u32) as u16,
             PextType::EMU => pext32_emu(input as u32, mask as u32) as u16,
             PextType::NAIVE => pext16_naive(input, mask)
         }
