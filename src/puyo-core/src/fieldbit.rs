@@ -157,9 +157,9 @@ impl FieldBit {
         }
 
         if v[0] == 0 {
-            v[1] &= !v[1].wrapping_add(1);
+            v[1] &= (!v[1]).wrapping_add(1);
         } else {
-            v[0] &= !v[0].wrapping_add(1);
+            v[0] &= (!v[0]).wrapping_add(1);
             v[1] = 0;
         }
 

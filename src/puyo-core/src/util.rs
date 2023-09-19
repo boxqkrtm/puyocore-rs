@@ -8,7 +8,7 @@ pub fn pext16(input: u16, mut mask: u16) -> u16 {
     let mut result: u16 = 0;
     let mut bb: u16 = 0;
     while mask != 0 {
-        if input & mask & (!mask.wrapping_add(1)) != 0 {
+        if input & mask & ((!mask).wrapping_add(1)) != 0 {
             result |= bb.0;
         }
         mask &= mask - 1;
