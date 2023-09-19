@@ -1,0 +1,2 @@
+[build]
+rustflags = ["-C", "embed-bitcode=true", "-C", "overflow-checks=false", "-C", "lto", "-C", "opt-level=3","-C", "target-feature=+sse,+sse2,+sse3,+sse4.1,+sse4.2,+ssse3,+lzcnt,+popcnt,+avx"]

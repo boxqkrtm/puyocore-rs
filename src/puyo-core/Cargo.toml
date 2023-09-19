@@ -10,3 +10,4 @@ edition = "2021"
 [lib]
 name = "puyo_core"
 path = "src/main.rs"
+
