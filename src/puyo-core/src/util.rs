@@ -1,8 +1,18 @@
 use std::arch::x86_64::*;
 
+pub enum PextType {
+    NATIVE, EMU, NAIVE
+}
+pub static mut PEXT_TYPE: PextType = PextType::NAIVE;
+
 pub fn pext16(input: u16, mask: u16) -> u16 {
-    //return pext32_emu(input as u32, mask as u32) as u16;
-    return unsafe {_pext_u32(input as u32, mask as u32) } as u16;
+    unsafe {
+        match PEXT_TYPE {
+            PextType::NATIVE => pext16_naive(input, mask),
+            PextType::EMU => pext32_emu(input as u32, mask as u32) as u16,
+            PextType::NAIVE => pext16_naive(input, mask)
+        }
+    }
 }
 
 //https://github.com/InstLatx64/InstLatX64_Demo/blob/master/PEXT_PDEP_Emu.cpp
@@ -69,17 +79,15 @@ pub fn pext32_emu(v: u32, mut m: u32) -> u32 {
     return ret;
 }
 
-/*
-pub fn pext16(input: u16, mut mask: u16) -> u16 {
+pub fn pext16_naive(input: u16, mut mask: u16) -> u16 {
     let mut result: u16 = 0;
-    let mut bb: u16 = 0;
+    let mut bb: u16 = 1;
     while mask != 0 {
         if input & mask & ((!mask).wrapping_add(1)) != 0 {
-            result |= bb.0;
+            result |= bb;
         }
-        mask &= mask - 1;
+        mask &= mask.wrapping_sub(1);
         bb = bb.wrapping_add(bb);
     }
     return result;
 }
-*/
