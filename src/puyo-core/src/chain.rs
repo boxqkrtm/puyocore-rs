@@ -19,23 +19,23 @@ pub fn get_score(mask: &mut Vec<Field>) -> Chain {
 
         let chain_power = POWER[index];
 
-        let mut color = 0;
+        let mut color: i32 = 0;
         for cell in &mask[index].data[..cell::COUNT - 1] {
-            color += if cell.get_count() > 0 { 1 } else { 0 };
+            color = color.wrapping_add(if cell.get_count() > 0 { 1 } else { 0 });
         }
         
         let bonus_color = COLOR_BONUS[color as usize];
 
-        let mut group_bonus = 0;
+        let mut group_bonus:u32 = 0;
         for i in 0..cell::COUNT {
             while mask[index].data[i].get_count() > 0 {
                 let group = mask[index].data[i].get_mask_group_lsb();
                 mask[index].data[i] = mask[index].data[i] & (!group);
-                group_bonus += GROUP_BONUS[std::cmp::min(11, group.get_count() as usize)];
+                group_bonus = group_bonus.wrapping_add(GROUP_BONUS[std::cmp::min(11, group.get_count() as usize)]);
             }
         }
-        
-        result.score += pop_count as u32 * 10 * std::cmp::max(1, std::cmp::min(MAX_CHAIN_POWER, chain_power + bonus_color + group_bonus)) as u32;
+        let bonus_score = std::cmp::max(1, std::cmp::min(MAX_CHAIN_POWER, chain_power.wrapping_add(bonus_color).wrapping_add(group_bonus))) as u32;
+        result.score = result.score.wrapping_add(pop_count.wrapping_mul(10).wrapping_mul(bonus_score));
     }
     result
 }

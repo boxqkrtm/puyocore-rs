@@ -31,9 +31,9 @@ impl Field {
     }
 
     pub fn get_count(&self) -> u32 {
-        let mut result = 0;
+        let mut result: u32 = 0;
         for cell in 0..cell::COUNT {
-            result += self.data[cell].get_count();
+            result = result.wrapping_add(self.data[cell].get_count());
         }
         result
     }
@@ -85,7 +85,7 @@ impl Field {
     }
 
     fn get_drop_pair_frame(&self, x: i8, direction: direction::Type) -> u8 {
-        if self.get_height(x) != self.get_height(x + direction::get_offset_x(direction)) {
+        if self.get_height(x) != self.get_height(x.wrapping_add(direction::get_offset_x(direction))) {
             return 2;
         }
         return 1;
@@ -120,8 +120,8 @@ impl Field {
     ) -> bool {
         self.is_occupied_with_heights(x, y, heights)
             || self.is_occupied_with_heights(
-                x + direction::get_offset_x(direction),
-                y + direction::get_offset_y(direction),
+                x.wrapping_add(direction::get_offset_x(direction)),
+                y.wrapping_add(direction::get_offset_y(direction)),
                 heights,
             )
     }
@@ -143,7 +143,7 @@ impl Field {
             }
             direction::Type::RIGHT => {
                 self.drop_puyo(x, pair.first);
-                self.drop_puyo(x + 1, pair.second);
+                self.drop_puyo(x.wrapping_add(1), pair.second);
             }
             direction::Type::DOWN => {
                 self.drop_puyo(x, pair.second);
@@ -151,7 +151,7 @@ impl Field {
             }
             direction::Type::LEFT => {
                 self.drop_puyo(x, pair.first);
-                self.drop_puyo(x - 1, pair.second);
+                self.drop_puyo(x.wrapping_add(-1), pair.second);
             }
         }
     }

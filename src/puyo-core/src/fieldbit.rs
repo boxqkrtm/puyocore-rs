@@ -42,7 +42,7 @@ impl FieldBit {
         unsafe {
             _mm_store_si128(v_mut_ptr as *mut __m128i, self.data.0);
         }
-        v[0].count_ones() + v[1].count_ones()
+        v[0].count_ones().wrapping_add(v[1].count_ones())
     }
 
     pub fn get_col(&self, x: i8) -> u16 {
@@ -157,9 +157,9 @@ impl FieldBit {
         }
 
         if v[0] == 0 {
-            v[1] &= !v[1] + 1;
+            v[1] &= !v[1].wrapping_add(1);
         } else {
-            v[0] &= !v[0] + 1;
+            v[0] &= !v[0].wrapping_add(1);
             v[1] = 0;
         }
 
