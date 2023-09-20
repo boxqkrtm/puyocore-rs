@@ -189,7 +189,7 @@ impl FieldBit {
         }
 
         for i in 0..6 {
-            v[i] = util::pext16(v[i], !v_mask[i]);
+            v[i] = util::pext14(v[i], !v_mask[i]);
         }
 
         self.data.0 = unsafe { _mm_load_si128(v_ptr as *const __m128i) };

@@ -1,17 +1,17 @@
 use std::arch::x86_64::*;
 
-pub fn pext16(input: u16, mask: u16) -> u16 {
+pub fn pext14(input: u16, mask: u16) -> u16 {
     if cfg!(target_feature = "bmi2") {
         unsafe {
             return _pext_u32(input as u32, mask as u32) as u16;
         }
     } else {
-        return pext16_emu(input, mask);
+        return pext15_emu(input, mask);
     }
 }
 
 //https://github.com/InstLatx64/InstLatX64_Demo/blob/master/PEXT_PDEP_Emu.cpp
-pub fn pext16_emu(v: u16, m: u16) -> u16 {
+pub fn pext15_emu(v: u16, m: u16) -> u16 {
     unsafe {
         let v_u32: u32 = v as u32;
         let m_u32: u32 = m as u32;
@@ -49,10 +49,10 @@ pub fn pext16_emu(v: u16, m: u16) -> u16 {
                 ret = (msb1 << 3) | (msb0 << 2) | (lsb0 << 1) | lsb1;
             }
             15 => {
-                let zero_location = !m;
+                let zero_location: u16 = !m;
                 let left_mask:u16 = zero_location << 1;
                 let right_mask:u16 = zero_location;
-                let both_mask:u16 = left_mask & right_mask;
+                let both_mask:u16 = left_mask | right_mask;
                 ret = ((v & !both_mask) + ((v & left_mask) >> 1)) as u32;
             }
             16 => {

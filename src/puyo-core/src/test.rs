@@ -1,5 +1,7 @@
 #[cfg(test)]
 pub mod test {
+    use std::arch::x86_64::_pext_u32;
+
     use crate::cell;
     use crate::chain;
     use crate::field::Field;
@@ -14,11 +16,23 @@ pub mod test {
     }
 
     #[test]
-    fn pext16() {
-        let n = 0b1011_1110_1001_0011u16;
-        let m0 = 0b0110_0011_1000_0101u16;
-        let s0 = 0b0000_0000_0011_0101u16;
-        assert_eq!(util::pext16(n, m0), s0);
+    fn pext() {
+        unsafe {
+            let n0 = 0b1011_1110_1001_0011u16;
+            let m0 = 0b0110_0011_1000_0101u16;
+            assert_eq!(
+                util::pext15_emu(n0, m0),
+                _pext_u32(n0 as u32, m0 as u32) as u16
+            );
+        }
+        unsafe {
+            let n0 = 0b0000_1110_1001_0011u16;
+            let m0 = 0b1111_0111_1111_1111u16;
+            assert_eq!(
+                util::pext15_emu(n0, m0),
+                _pext_u32(n0 as u32, m0 as u32) as u16
+            );
+        }
     }
 
     #[test]
@@ -31,22 +45,22 @@ pub mod test {
     }
 
     #[test]
-    fn rensa(){
+    fn rensa() {
         let mut f = Field::new(); // Field 구조체 초기화 코드 추가
         let c: [[char; 7]; 13] = [
-            ['B','.','Y','R','G','Y','\0'],
-            ['B','B','B','Y','R','B','\0'],
-            ['G','B','Y','R','G','G','\0'],
-            ['B','G','Y','R','G','B','\0'],
-            ['G','R','G','Y','R','B','\0'],
-            ['R','G','Y','R','Y','B','\0'],
-            ['G','R','G','Y','R','Y','\0'],
-            ['G','R','G','Y','R','Y','\0'],
-            ['G','B','B','G','Y','G','\0'],
-            ['B','Y','R','B','G','G','\0'],
-            ['G','B','Y','R','B','Y','\0'],
-            ['G','B','Y','R','B','Y','\0'],
-            ['G','B','Y','R','B','Y','\0'],
+            ['B', '.', 'Y', 'R', 'G', 'Y', '\0'],
+            ['B', 'B', 'B', 'Y', 'R', 'B', '\0'],
+            ['G', 'B', 'Y', 'R', 'G', 'G', '\0'],
+            ['B', 'G', 'Y', 'R', 'G', 'B', '\0'],
+            ['G', 'R', 'G', 'Y', 'R', 'B', '\0'],
+            ['R', 'G', 'Y', 'R', 'Y', 'B', '\0'],
+            ['G', 'R', 'G', 'Y', 'R', 'Y', '\0'],
+            ['G', 'R', 'G', 'Y', 'R', 'Y', '\0'],
+            ['G', 'B', 'B', 'G', 'Y', 'G', '\0'],
+            ['B', 'Y', 'R', 'B', 'G', 'G', '\0'],
+            ['G', 'B', 'Y', 'R', 'B', 'Y', '\0'],
+            ['G', 'B', 'Y', 'R', 'B', 'Y', '\0'],
+            ['G', 'B', 'Y', 'R', 'B', 'Y', '\0'],
         ];
         f.from(&c);
         let mut mask = f.pop();
