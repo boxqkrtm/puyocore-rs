@@ -40,6 +40,6 @@ fn bench_pop(iter: i32) {
 }
 
 fn main() {
-    let iter = 500000; // 원하는 반복 횟수 설정
+    let iter = 5000000; // 원하는 반복 횟수 설정
     bench_pop(iter);
 }
