@@ -13,50 +13,57 @@ pub fn pext16(input: u16, mask: u16) -> u16 {
 //https://github.com/InstLatx64/InstLatX64_Demo/blob/master/PEXT_PDEP_Emu.cpp
 pub fn pext16_emu(v: u16, m: u16) -> u16 {
     unsafe {
-        let v: u32 = v as u32;
-        let mut m: u32 = m as u32;
+        let v_u32: u32 = v as u32;
+        let m_u32: u32 = m as u32;
         let ret: u32;
-        let pc = m.count_ones();
+        let pc = m_u32.count_ones();
         match pc {
             0 => {
                 ret = 0;
             }
             1 => {
-                ret = ((v & m) as u32 != 0) as u32;
+                ret = ((v_u32 & m_u32) as u32 != 0) as u32;
             }
             2 => {
-                let msb = _bextr_u32(v, 31 - _lzcnt_u32(m), 1);
-                let lsb = _bextr_u32(v, _tzcnt_u32(m), 1);
+                let msb = _bextr_u32(v_u32, 31 - _lzcnt_u32(m_u32), 1);
+                let lsb = _bextr_u32(v_u32, _tzcnt_u32(m_u32), 1);
                 ret = (msb << 1) | lsb;
             }
             3 => {
-                let lz = 31 - _lzcnt_u32(m);
-                let tz = _tzcnt_u32(m);
-                let msb = _bextr_u32(v, lz, 1);
-                let lsb = _bextr_u32(v, tz, 1);
-                m = _blsr_u32(m);
-                let csb = _bextr_u32(v, _tzcnt_u32(m), 1);
+                let lz = 31 - _lzcnt_u32(m_u32);
+                let tz = _tzcnt_u32(m_u32);
+                let msb = _bextr_u32(v_u32, lz, 1);
+                let lsb = _bextr_u32(v_u32, tz, 1);
+                let m_u32_2 = _blsr_u32(m_u32);
+                let csb = _bextr_u32(v_u32, _tzcnt_u32(m_u32_2), 1);
                 ret = (msb << 2) | (csb << 1) | lsb;
             }
             4 => {
-                let lz = 31 - _lzcnt_u32(m);
-                let tz = _tzcnt_u32(m);
-                let msb1 = _bextr_u32(v, lz, 1);
-                let lsb1 = _bextr_u32(v, tz, 1);
-                m &= !((1 << lz) | (1 << tz));
-                let msb0 = _bextr_u32(v, 31 - _lzcnt_u32(m), 1);
-                let lsb0 = _bextr_u32(v, _tzcnt_u32(m), 1);
+                let lz = 31 - _lzcnt_u32(m_u32);
+                let tz = _tzcnt_u32(m_u32);
+                let msb1 = _bextr_u32(v_u32, lz, 1);
+                let lsb1 = _bextr_u32(v_u32, tz, 1);
+                let m_u32_2 = (m & (!((1 << lz) | (1 << tz)))) as u32;
+                let msb0 = _bextr_u32(v_u32, 31 - _lzcnt_u32(m_u32_2), 1);
+                let lsb0 = _bextr_u32(v_u32, _tzcnt_u32(m_u32_2), 1);
                 ret = (msb1 << 3) | (msb0 << 2) | (lsb0 << 1) | lsb1;
             }
+            15 => {
+                let zero_location = !m;
+                let left_mask:u16 = zero_location << 1;
+                let right_mask:u16 = zero_location;
+                let both_mask:u16 = left_mask & right_mask;
+                ret = ((v & !both_mask) + ((v & left_mask) >> 1)) as u32;
+            }
             16 => {
-                ret = v;
+                ret = v_u32;
             }
             _ => {
-                let mut mm = _mm_cvtsi32_si128(!m as i32);
+                let mut mm = _mm_cvtsi32_si128(!m_u32 as i32);
                 let mtwo = _mm_set1_epi64x((!0u64 - 1) as i64);
                 let mut clmul = _mm_clmulepi64_si128(mm, mtwo, 0);
                 let bit0 = _mm_cvtsi128_si32(clmul) as u32;
-                let mut a = v & m;
+                let mut a = v_u32 & m_u32;
                 a = (!bit0 & a) | ((bit0 & a) >> 1);
                 mm = _mm_and_si128(mm, clmul);
                 clmul = _mm_clmulepi64_si128(mm, mtwo, 0);
