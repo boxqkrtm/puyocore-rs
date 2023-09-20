@@ -178,13 +178,14 @@ impl FieldBit {
     }
 
     pub fn pop(&mut self, mask: &FieldBit) {
-                let mut v= u16x8::splat(0);
+        let mut v= u16x8::splat(0);
         let v_mut_ptr = v.as_mut_array().as_mut_ptr();
         let v_ptr = v.as_array().as_ptr();
-        let mut v_mask: [u16; 8] = [0; 8];
+        let mut v_mask = u16x8::splat(0);
+        let v_mask_mut_ptr = v_mask.as_mut_array().as_mut_ptr();
         unsafe {
             _mm_store_si128(v_mut_ptr as *mut __m128i, self.data.0);
-            _mm_store_si128(v_mask.as_mut_ptr() as *mut __m128i, mask.data.0);
+            _mm_store_si128(v_mask_mut_ptr as *mut __m128i, mask.data.0);
         }
 
         for i in 0..6 {

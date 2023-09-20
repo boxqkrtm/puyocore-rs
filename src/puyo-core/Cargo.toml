@@ -11,3 +11,5 @@ edition = "2021"
 name = "puyo_core"
 path = "src/main.rs"
 
+[features]
+bmi2=[]

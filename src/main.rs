@@ -40,16 +40,6 @@ fn bench_pop(iter: i32) {
 }
 
 fn main() {
-    let iter = 5000000; // 원하는 반복 횟수 설정
-    unsafe { puyo_core::util::PEXT_TYPE = puyo_core::util::PextType::NATIVE; };
-    println!("NATIVE PEXT");
-    bench_pop(iter);
-
-    unsafe { puyo_core::util::PEXT_TYPE = puyo_core::util::PextType::EMU; };
-    println!("EMU PEXT");
-    bench_pop(iter);
-
-    unsafe { puyo_core::util::PEXT_TYPE = puyo_core::util::PextType::NAIVE; };
-    println!("NAIVE FOR LOOP PEXT");
+    let iter = 500000; // 원하는 반복 횟수 설정
     bench_pop(iter);
 }
