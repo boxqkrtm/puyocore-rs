@@ -5,11 +5,15 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-
 [lib]
 name = "puyo_core"
-path = "src/main.rs"
+path = "src/lib.rs"
 
-[features]
-bmi2=[]
+[profile.release]
+opt-level=3
+lto=true
+overflow-checks=false
+
+[[bench]]
+name = "bench"
+harness = false

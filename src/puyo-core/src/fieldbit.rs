@@ -19,7 +19,7 @@ impl FieldBit {
         unsafe {
             _mm_store_si128(v_mut_ptr as *mut __m128i, self.data.0);
         }
-        v[x as usize] |= 1 << y;
+        v[x as usize] |= 1u16.wrapping_shl(y as u32);
         self.data.0 = unsafe { _mm_load_si128(v_mut_ptr as *const __m128i) };
     }
 
@@ -33,7 +33,7 @@ impl FieldBit {
         unsafe {
             _mm_store_si128(v_mut_ptr as *mut __m128i, self.data.0);
         }
-        v[x as usize] & (1 << y) != 0
+        v[x as usize] & (1u16.wrapping_shl(y as u32)) != 0
     }
 
     pub fn get_count(&self) -> u32 {
@@ -189,7 +189,7 @@ impl FieldBit {
         }
 
         for i in 0..6 {
-            v[i] = util::pext14(v[i], !v_mask[i]);
+            v[i] = util::pext16(v[i], !v_mask[i]);
         }
 
         self.data.0 = unsafe { _mm_load_si128(v_ptr as *const __m128i) };

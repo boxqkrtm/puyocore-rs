@@ -21,18 +21,26 @@ pub mod test {
             let n0 = 0b1011_1110_1001_0011u16;
             let m0 = 0b0110_0011_1000_0101u16;
             assert_eq!(
-                util::pext15_emu(n0, m0),
-                _pext_u32(n0 as u32, m0 as u32) as u16
+                format!("{:016b}", util::pext15_emu(n0, m0)),
+                format!("{:016b}",_pext_u32(n0 as u32, m0 as u32) as u16)
             );
         }
         unsafe {
             let n0 = 0b0000_1110_1001_0011u16;
             let m0 = 0b1111_0111_1111_1111u16;
             assert_eq!(
-                util::pext15_emu(n0, m0),
-                _pext_u32(n0 as u32, m0 as u32) as u16
+                format!("{:016b}", util::pext15_emu(n0, m0)),
+                format!("{:016b}",_pext_u32(n0 as u32, m0 as u32) as u16)
             );
         }
+        // unsafe {
+        //     let n0 = 0b0000_1110_1001_0011u16;
+        //     let m0 = 0b0111_1111_1111_1111u16;
+        //     assert_eq!(
+        //         format!("{:016b}", util::pext15_emu(n0, m0)),
+        //         format!("{:016b}",_pext_u32(n0 as u32, m0 as u32) as u16)
+        //     );
+        // }
     }
 
     #[test]
