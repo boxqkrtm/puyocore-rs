@@ -1,4 +1,3 @@
-
 use std::arch::x86_64::*;
 //use std::arch::arm::*;
 
@@ -18,88 +17,38 @@ pub fn pext15_emu(v: u16, m: u16) -> u16 {
     unsafe {
         let v_u32: u32 = v as u32;
         let m_u32: u32 = m as u32;
-        let ret: u32;
         let pc = m_u32.count_ones();
-        //disabled because of performance
-        //이어진 2,3,4,5,6pop의 경우 빠르게 처리
-        // if pc >= 10 && pc <= 14 {
-        //     let popcnt = 16 - pc;
-        //     let to = v.trailing_ones();
-        //     let lo = v.leading_ones();
-        //     let middle_size = 16-to-lo;
-        //     //0이 이어져 있는지 확인
-        //     if middle_size - popcnt == 0 {
-        //         let v_left = (v_u32 >> pc) as u16;
-        //         let v_right = (v_u32 >> lo) as u16;
-        //         ret = ((v_left << lo) | v_right) as u32;
-        //         return ret as u16;
-        //     }
-        // }
-        match pc {
-            0 => {
-                ret = 0;
-            }
-            1 => {
-                ret = ((v_u32 & m_u32) as u32 != 0) as u32;
-            }
-            2 => {
-                let msb = _bextr_u32(v_u32, 31 - _lzcnt_u32(m_u32), 1);
-                let lsb = _bextr_u32(v_u32, _tzcnt_u32(m_u32), 1);
-                ret = (msb.wrapping_shl(1)) | lsb;
-            }
-            3 => {
-                let lz = 31 - _lzcnt_u32(m_u32);
-                let tz = _tzcnt_u32(m_u32);
-                let msb = _bextr_u32(v_u32, lz, 1);
-                let lsb = _bextr_u32(v_u32, tz, 1);
-                let m_u32_2 = _blsr_u32(m_u32);
-                let csb = _bextr_u32(v_u32, _tzcnt_u32(m_u32_2), 1);
-                ret = (msb.wrapping_shl(2)) | (csb.wrapping_shl(1)) | lsb;
-            }
-            4 => {
-                let lz = 31 - _lzcnt_u32(m_u32);
-                let tz = _tzcnt_u32(m_u32);
-                let msb1 = _bextr_u32(v_u32, lz, 1);
-                let lsb1 = _bextr_u32(v_u32, tz, 1);
-                let m_u32_2 = (m as u32 & (!((1u32.wrapping_shl(lz)) | (1u32.wrapping_shl(tz))))) as u32;
-                let msb0 = _bextr_u32(v_u32, 31 - _lzcnt_u32(m_u32_2), 1);
-                let lsb0 = _bextr_u32(v_u32, _tzcnt_u32(m_u32_2), 1);
-                ret = (msb1.wrapping_shl(3)) | (msb0.wrapping_shl(2)) | (lsb0.wrapping_shl(1)) | lsb1;
-            }
-            15 => {
-                //not working with 0b0111111111111111
-                let zero_location: u16 = !m;
-                let zero_location_index = zero_location.trailing_zeros() + 1;
-                let left_mask = (!0u16).wrapping_shr(zero_location_index).wrapping_shl(zero_location_index);
-                let right_mask = (!left_mask).wrapping_shr(1);
-                let shifted_left_value = (v & left_mask).wrapping_shr(1);
-                ret = ((v & right_mask) | shifted_left_value) as u32;
-            }
-            16 => {
-                ret = v_u32;
-            }
-            _ => {
-                let mut mm = _mm_cvtsi32_si128(!m_u32 as i32);
-                let mtwo = _mm_set1_epi64x((!0u64 - 1) as i64);
-                let mut clmul = _mm_clmulepi64_si128(mm, mtwo, 0);
-                let bit0 = _mm_cvtsi128_si32(clmul) as u32;
-                let mut a = v_u32 & m_u32;
-                a = (!bit0 & a) | ((bit0 & a).wrapping_shr(1));
-                mm = _mm_and_si128(mm, clmul);
-                clmul = _mm_clmulepi64_si128(mm, mtwo, 0);
-                let bit1 = _mm_cvtsi128_si32(clmul) as u32;
-                a = (!bit1 & a) | ((bit1 & a).wrapping_shr(2));
-                mm = _mm_and_si128(mm, clmul);
-                clmul = _mm_clmulepi64_si128(mm, mtwo, 0);
-                let bit2 = _mm_cvtsi128_si32(clmul) as u32;
-                a = (!bit2 & a) | ((bit2 & a).wrapping_shr(4));
-                mm = _mm_and_si128(mm, clmul);
-                clmul = _mm_clmulepi64_si128(mm, mtwo, 0);
-                let bit3 = _mm_cvtsi128_si32(clmul) as u32;
-                ret = ((!bit3 & a) | ((bit3 & a).wrapping_shr(8))) as u32;
-            }
+        if pc == 16 {
+            return v;
         }
-        return ret as u16;
+        //shifting 2pop ~ 6pop case is slower than now
+        if pc == 15 {
+            let zero_location: u16 = !m;
+            let zero_location_index = zero_location.trailing_zeros() + 1;
+            let left_mask = (!0u16).wrapping_shr(zero_location_index).wrapping_shl(zero_location_index);
+            let right_mask = (!left_mask).wrapping_shr(1);
+            let shifted_left_value = (v & left_mask).wrapping_shr(1);
+            return (v & right_mask) | shifted_left_value;
+        } else {
+            let mut mm = _mm_cvtsi32_si128(!m_u32 as i32);
+            let mtwo = _mm_set1_epi64x((!0u64 - 1) as i64);
+            let mut clmul = _mm_clmulepi64_si128(mm, mtwo, 0);
+            let bit0 = _mm_cvtsi128_si32(clmul) as u32;
+            let mut a = v_u32 & m_u32;
+            a = (!bit0 & a) | ((bit0 & a).wrapping_shr(1));
+            mm = _mm_and_si128(mm, clmul);
+            clmul = _mm_clmulepi64_si128(mm, mtwo, 0);
+            let bit1 = _mm_cvtsi128_si32(clmul) as u32;
+            a = (!bit1 & a) | ((bit1 & a).wrapping_shr(2));
+            mm = _mm_and_si128(mm, clmul);
+            clmul = _mm_clmulepi64_si128(mm, mtwo, 0);
+            let bit2 = _mm_cvtsi128_si32(clmul) as u32;
+            a = (!bit2 & a) | ((bit2 & a).wrapping_shr(4));
+            mm = _mm_and_si128(mm, clmul);
+            clmul = _mm_clmulepi64_si128(mm, mtwo, 0);
+            let bit3 = _mm_cvtsi128_si32(clmul) as u32;
+            return ((!bit3 & a) | ((bit3 & a).wrapping_shr(8))) as u16;
+        }
     }
 }
 
