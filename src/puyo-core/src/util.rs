@@ -8,22 +8,11 @@ pub fn pext16(input: u16, mask: u16) -> u16 {
             return _pext_u32(input as u32, mask as u32) as u16;
         }
     } else {
-        return pext15_emu(input, mask);
+        return pext16_naive(input, mask);
+        //return pext15_emu(input, mask);
     }
 }
 
-pub fn bextr_u32(a: u32, start: u32, len: u32) -> u32 {
-    if cfg!(target="x86_64") {
-        unsafe{
-            return _bextr_u32(a, start, len);
-        }
-    }
-    // else if cfg!(target="aarch64") {
-    //     unsafe{
-    //         return 
-    //     }
-    // }
-}
 //https://github.com/InstLatx64/InstLatX64_Demo/blob/master/PEXT_PDEP_Emu.cpp - edit for puyo (not all mask support for performance)
 pub fn pext15_emu(v: u16, m: u16) -> u16 {
     unsafe {
@@ -31,13 +20,21 @@ pub fn pext15_emu(v: u16, m: u16) -> u16 {
         let m_u32: u32 = m as u32;
         let ret: u32;
         let pc = m_u32.count_ones();
-        //TODO 이어진 2,3,4,5,6pop의 경우 빠르게 처리
-        if false && pc >= 10 && pc <= 14 {
-            let popcnt = 16 - pc;
-            //0이 이어져 있는지 확인
-
-            //시프트 연산으로 한번에 이동
-        }
+        //disabled because of performance
+        //이어진 2,3,4,5,6pop의 경우 빠르게 처리
+        // if pc >= 10 && pc <= 14 {
+        //     let popcnt = 16 - pc;
+        //     let to = v.trailing_ones();
+        //     let lo = v.leading_ones();
+        //     let middle_size = 16-to-lo;
+        //     //0이 이어져 있는지 확인
+        //     if middle_size - popcnt == 0 {
+        //         let v_left = (v_u32 >> pc) as u16;
+        //         let v_right = (v_u32 >> lo) as u16;
+        //         ret = ((v_left << lo) | v_right) as u32;
+        //         return ret as u16;
+        //     }
+        // }
         match pc {
             0 => {
                 ret = 0;
