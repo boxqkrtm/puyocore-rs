@@ -9,7 +9,7 @@ if your cpu support hardware bmi2. you can add +bmi2 in `tuyotuyo-rs/.cargo/conf
 it will be increase 3.9x speed up
 
 # WIP Todo
-- [ ] fast puyo pop calculation - TODO fix emu 15 bug
+- [x] fast puyo pop calculation
 - [ ] chain detector
 - [ ] key input generator
 - [ ] puyo puyo esports based timing duel simulator

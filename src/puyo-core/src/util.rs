@@ -22,6 +22,7 @@ pub fn pext15_emu(v: u16, m: u16) -> u16 {
             return v;
         }
         //shifting 2pop ~ 6pop case is slower than now
+        //0b0111_1111_1111_1111 mask not working
         if pc == 15 {
             let zero_location: u16 = !m;
             let zero_location_index = zero_location.trailing_zeros() + 1;

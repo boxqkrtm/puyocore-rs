@@ -33,14 +33,6 @@ pub mod test {
                 format!("{:016b}",_pext_u32(n0 as u32, m0 as u32) as u16)
             );
         }
-        // unsafe {
-        //     let n0 = 0b0000_1110_1001_0011u16;
-        //     let m0 = 0b0111_1111_1111_1111u16;
-        //     assert_eq!(
-        //         format!("{:016b}", util::pext15_emu(n0, m0)),
-        //         format!("{:016b}",_pext_u32(n0 as u32, m0 as u32) as u16)
-        //     );
-        // }
     }
 
     #[test]
