@@ -8,8 +8,8 @@ pub fn pext16(input: u16, mask: u16) -> u16 {
             return _pext_u32(input as u32, mask as u32) as u16;
         }
     } else {
-        return pext16_naive(input, mask);
-        //return pext15_emu(input, mask);
+        //return pext16_naive(input, mask);
+        return pext15_emu(input, mask);
     }
 }
 
