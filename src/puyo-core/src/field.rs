@@ -2,8 +2,7 @@ use crate::fieldbit::FieldBit;
 use crate::cell;
 use crate::direction;
 use crate::tsumo::Tsumo;
-use std::arch::x86_64::*;
-use std::simd::u16x8;
+use std::simd::Simd;
 
 pub struct Field {
     pub data: [FieldBit; cell::COUNT],//r g b y garbage
@@ -41,11 +40,7 @@ impl Field {
     pub fn get_height(&self, x: i8) -> u8 {
         let mask = self.get_mask();
         let v = mask.data;
-        let mut heights = u16x8::splat(0);
-        let heights_mut_ptr = heights.as_mut_array().as_mut_ptr();
-        unsafe {
-            _mm_store_si128(heights_mut_ptr as *mut __m128i, v.0);
-        }
+        let heights = v.clone();
         16 - heights[x as usize].leading_zeros() as u8
     }
 
@@ -58,11 +53,7 @@ impl Field {
     pub fn get_heights(&self, heights: &mut [u8; 6]) {
         let mask = self.get_mask();
         let v = mask.data;
-        let mut heights_arr = u16x8::splat(0);
-        let heights_arr_mut_ptr = heights_arr.as_mut_array().as_mut_ptr();
-        unsafe {
-            _mm_store_si128(heights_arr_mut_ptr as *mut __m128i, v.0);
-        }
+        let heights_arr = v.clone();
         for i in 0..6 {
             heights[i] = 16 - heights_arr[i] as u8;
         }
@@ -163,7 +154,9 @@ impl Field {
         for _ in 0..20 {
             let pop = unsafe { current.get_mask_pop() };
             let mut mask_pop = pop.get_mask();
-            if unsafe { _mm_testz_si128(mask_pop.data.0, mask_pop.data.0) == 1 } {
+            let a =  unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(mask_pop.data)};
+            let mask:Simd<u64,2> = unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(mask_pop.data)};
+            if (!a[0] & mask[0]) == mask[0] && (!a[1] & mask[1]) == mask[1] {
                 break;
             }
             result.push(pop);

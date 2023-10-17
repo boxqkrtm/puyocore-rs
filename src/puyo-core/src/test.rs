@@ -1,6 +1,13 @@
 #[cfg(test)]
 pub mod test {
+    use std::arch::x86_64::__m128i;
+    use std::arch::x86_64::_mm_and_si128;
+    use std::arch::x86_64::_mm_set_epi16;
+    use std::arch::x86_64::_mm_slli_epi16;
+    use std::arch::x86_64::_mm_slli_si128;
+    use std::arch::x86_64::_mm_srli_si128;
     use std::arch::x86_64::_pext_u32;
+    use std::simd::u16x8;
 
     use crate::cell;
     use crate::chain;
@@ -22,7 +29,7 @@ pub mod test {
             let m0 = 0b0110_0011_1000_0101u16;
             assert_eq!(
                 format!("{:016b}", util::pext15_emu(n0, m0)),
-                format!("{:016b}",_pext_u32(n0 as u32, m0 as u32) as u16)
+                format!("{:016b}", _pext_u32(n0 as u32, m0 as u32) as u16)
             );
         }
         unsafe {
@@ -30,7 +37,7 @@ pub mod test {
             let m0 = 0b1111_0111_1111_1111u16;
             assert_eq!(
                 format!("{:016b}", util::pext15_emu(n0, m0)),
-                format!("{:016b}",_pext_u32(n0 as u32, m0 as u32) as u16)
+                format!("{:016b}", _pext_u32(n0 as u32, m0 as u32) as u16)
             );
         }
     }
@@ -67,5 +74,56 @@ pub mod test {
         let chain = chain::get_score(&mut mask);
         assert_eq!(chain.count, 19);
         assert_eq!(chain.score, 177640);
+    }
+
+    #[test]
+    fn shi() {
+        let data = u16x8::from_array([3300,9000,2,3,4,5,6,7]);
+        unsafe {
+            let data128 = std::mem::transmute::<u16x8, __m128i> (data);
+            let r128 = _mm_slli_epi16(data128, 1);
+            let r = std::mem::transmute::<__m128i, u16x8> (r128);
+            let r2 = util::mm_slli_epi16_1(data);
+            assert_eq!(r, r2);
+        }
+        unsafe {
+            let data128 = std::mem::transmute::<u16x8, __m128i> (data);
+            let r128 = _mm_srli_si128(data128, 1);
+            let r = std::mem::transmute::<__m128i, u16x8> (r128);
+            let r2 = util::mm_srli_si128_1(data);
+            assert_eq!(r, r2);
+        }
+        unsafe {
+            let data128 = std::mem::transmute::<u16x8, __m128i> (data);
+            let r128 = _mm_slli_si128(data128, 2);
+            let r = std::mem::transmute::<__m128i, u16x8> (r128);
+            let r2 = util::mm_slli_si128_2(data);
+            assert_eq!(r, r2);
+        }
+        unsafe {
+            let data128 = std::mem::transmute::<u16x8, __m128i> (data);
+            let r128 = _mm_srli_si128(data128, 1);
+            let r = std::mem::transmute::<__m128i, u16x8> (r128);
+            let r2 = util::mm_srli_si128_1(data);
+            assert_eq!(r, r2);
+        }
+        unsafe {
+            let data128 = std::mem::transmute::<u16x8, __m128i> (data);
+            let r128 = _mm_srli_si128(data128, 2);
+            let r = std::mem::transmute::<__m128i, u16x8> (r128);
+            let r2 = util::mm_srli_si128_2(data);
+            assert_eq!(r, r2);
+        }
+    }
+
+    #[test]
+    fn set_simd(){
+        unsafe {
+        let r = std::mem::transmute::<__m128i, u16x8>(
+            _mm_set_epi16(0, 0, 0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF)
+        );
+        let r2 = u16x8::from_array([0x1FFF,0x1FFF,0x1FFF,0x1FFF,0x1FFF,0x1FFF,0x0000,0x0000,]);
+        assert_eq!(r, r2);
+        }
     }
 }
