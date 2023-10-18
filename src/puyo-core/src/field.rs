@@ -2,6 +2,8 @@ use crate::fieldbit::FieldBit;
 use crate::cell;
 use crate::direction;
 use crate::tsumo::Tsumo;
+use std::arch::x86_64::__m128i;
+use std::arch::x86_64::_mm_testz_si128;
 use std::simd::Simd;
 
 pub struct Field {
@@ -154,11 +156,15 @@ impl Field {
         for _ in 0..20 {
             let pop = unsafe { current.get_mask_pop() };
             let mut mask_pop = pop.get_mask();
-            let a =  unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(mask_pop.data)};
-            let mask:Simd<u64,2> = unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(mask_pop.data)};
-            if (!a[0] & mask[0]) == mask[0] && (!a[1] & mask[1]) == mask[1] {
+            let a =  unsafe {std::mem::transmute::<Simd<u16, 8>, __m128i>(mask_pop.data)};
+            if unsafe { _mm_testz_si128(a, a) == 1 } {
                 break;
             }
+            //let a =  unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(mask_pop.data)};
+            //let mask:Simd<u64,2> = unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(mask_pop.data)};
+            // if (!a[0] & mask[0]) == mask[0] && (!a[1] & mask[1]) == mask[1] {
+            //     break;
+            // }
             result.push(pop);
             let mut mask_pop_expanded = mask_pop | (mask_pop.get_expand() & current.data[cell::from_celltype(cell::CellType::GARBAGE).to_usize()]);
             for cell in 0..cell::COUNT {

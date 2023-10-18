@@ -1,6 +1,6 @@
-use std::simd::{u16x8, Simd};
 use crate::util;
-#[derive(Clone, Copy)] 
+use std::simd::{u16x8, u64x2, Simd};
+#[derive(Clone, Copy)]
 pub struct FieldBit {
     pub data: u16x8,
 }
@@ -25,8 +25,10 @@ impl FieldBit {
     }
 
     pub fn get_count(&self) -> u32 {
-        let v = self.data;
-        v[0].count_ones().wrapping_add(v[1].count_ones())
+        unsafe {
+            let v = std::mem::transmute::<u16x8, u64x2>(self.data);
+            return v[0].count_ones().wrapping_add(v[1].count_ones());
+        }
     }
 
     pub fn get_col(&self, x: i8) -> u16 {
@@ -34,7 +36,7 @@ impl FieldBit {
         self.data[x as usize]
     }
 
-    pub fn get_expand(& mut self) -> FieldBit {
+    pub fn get_expand(&mut self) -> FieldBit {
         let r = util::mm_srli_si128_2(self.data);
         let l = util::mm_slli_si128_2(self.data);
         let u = util::mm_srli_epi16_1(self.data);
@@ -46,16 +48,18 @@ impl FieldBit {
 
     fn get_mask_12(&self) -> FieldBit {
         let mut result = FieldBit::new();
-        let mask: u16x8 = u16x8::from_array([0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF,0,0]);
-        result.data = result.data & mask;
+        let mask: u16x8 = u16x8::from_array([0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0, 0]);
+        result.data = self.data & mask;
         //_mm_set_epi16(0, 0, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF),
         result
     }
 
     fn get_mask_13(&self) -> FieldBit {
         let mut result = FieldBit::new();
-        let mask: u16x8 = u16x8::from_array([0x1FFF,0x1FFF,0x1FFF,0x1FFF,0x1FFF,0x1FFF,0x0000,0x0000]);
-        result.data = result.data & mask;
+        let mask: u16x8 = u16x8::from_array([
+            0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF, 0x0000, 0x0000,
+        ]);
+        result.data = self.data & mask;
         //_mm_set_epi16(0, 0, 0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF, 0x1FFF),
         result
     }
@@ -94,12 +98,13 @@ impl FieldBit {
 
         while !self.data == m.data {
             let m_expand = m.get_expand().data & m12.data;
-            let a =  unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(m.data)};
-            let mask:Simd<u64,2> = unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(m_expand)};
+
+            let a = unsafe { std::mem::transmute::<Simd<u16, 8>, Simd<u64, 2>>(m.data) };
+            let mask = unsafe { std::mem::transmute::<Simd<u16, 8>, Simd<u64, 2>>(m_expand) };
             if (a[0] & mask[0]) == mask[0] && (a[1] & mask[1]) == mask[1] {
                 break;
             }
-            m.data = m_expand; 
+            m.data = m_expand;
         }
         m
     }
@@ -112,8 +117,10 @@ impl FieldBit {
 
         for _ in 0..4 {
             let m_expand = m.get_expand().data & m12.data;
-            let a =  unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(m.data)};
-            let mask:Simd<u64,2> = unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(m_expand)};
+
+            let a = unsafe { std::mem::transmute::<Simd<u16, 8>, Simd<u64, 2>>(m.data) };
+            let mask: Simd<u64, 2> =
+                unsafe { std::mem::transmute::<Simd<u16, 8>, Simd<u64, 2>>(m_expand) };
             if (a[0] & mask[0]) == mask[0] && (a[1] & mask[1]) == mask[1] {
                 break;
             }
@@ -136,11 +143,13 @@ impl FieldBit {
 
         let mut m = FieldBit::new();
         m.data = v.clone();
-        
+
         while !self.data == m.data {
             let m_expand = m.get_expand().data & m12.data;
-            let a =  unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(m.data)};
-            let mask:Simd<u64,2> = unsafe {std::mem::transmute::<Simd<u16, 8>, Simd<u64,2>>(m_expand)};
+
+            let a = unsafe { std::mem::transmute::<Simd<u16, 8>, Simd<u64, 2>>(m.data) };
+            let mask: Simd<u64, 2> =
+                unsafe { std::mem::transmute::<Simd<u16, 8>, Simd<u64, 2>>(m_expand) };
             if (a[0] & mask[0]) == mask[0] && (a[1] & mask[1]) == mask[1] {
                 break;
             }
@@ -151,7 +160,7 @@ impl FieldBit {
     }
 
     pub fn pop(&mut self, mask: &FieldBit) {
-        let mut v= self.data;
+        let mut v = self.data;
         let v_mask = mask.data;
 
         for i in 0..6 {
