@@ -6,7 +6,6 @@ pub mod util;
 pub mod tsumo;
 pub mod field;
 pub mod fieldbit;
-pub mod m128i;
 pub mod direction;
 pub mod chain;
 pub mod test;
