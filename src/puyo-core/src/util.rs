@@ -1,10 +1,11 @@
-use std::{arch::x86_64::*, simd::{u16x8, u8x16}};
-//use std::arch::arm::*;
+#[cfg(target_arch = "x86_64")]
+use std::arch::x86_64::*; 
+use std::simd::{u16x8, u8x16};
 
 pub fn pext16(input: u16, mask: u16) -> u16 {
-    #[cfg(target_feature = "bmi2")]
-    return unsafe { _pext_u32(input as u32, mask as u32) as u16 };
-    #[cfg(not(target_feature = "bmi2"))]
+    //#[cfg(target_feature = "bmi2")]
+    //return unsafe { _pext_u32(input as u32, mask as u32) as u16 };
+    //#[cfg(not(target_feature = "bmi2"))]
     return pext15_emu(input, mask);
 }
 

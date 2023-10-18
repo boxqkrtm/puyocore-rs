@@ -1,5 +1,6 @@
 #[cfg(test)]
 pub mod test {
+    #[cfg(target_arch = "x86_64")]
     use std::arch::x86_64::_pext_u32;
 
     use crate::cell;
@@ -15,6 +16,7 @@ pub mod test {
         assert_eq!(cell.to_char(), 'R');
     }
 
+    #[cfg(target_arch = "x86_64")]
     #[test]
     fn pext() {
         unsafe {

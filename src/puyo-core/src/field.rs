@@ -2,8 +2,6 @@ use crate::fieldbit::FieldBit;
 use crate::cell;
 use crate::direction;
 use crate::tsumo::Tsumo;
-use std::arch::x86_64::__m128i;
-use std::arch::x86_64::_mm_testz_si128;
 use std::simd::Simd;
 
 pub struct Field {
