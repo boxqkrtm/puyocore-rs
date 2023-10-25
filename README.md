@@ -1,5 +1,6 @@
 # Tuyotuyo-rs
-4color 3next 6*13 puyo puyo only ai <br>
+puyopuyo - 3next 4color<br>
+tetris - 5next<br>
 
 # How to build<br>
 ```
