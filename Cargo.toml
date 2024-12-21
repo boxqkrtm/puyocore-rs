@@ -1,14 +1,19 @@
 [package]
-name = "tuyotuyo-rs"
+name = "puyo-core"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
-puyo-core = { path = "./src/puyo-core" }
+[lib]
+name = "puyo_core"
+path = "src/lib.rs"
 
 [profile.release]
 opt-level=3
 lto=true
 overflow-checks=false
+
+[[bench]]
+name = "bench"
+harness = false
